@@ -5,7 +5,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import Login from '../views/static/login.vue'
 const routes = [
     {
-        path: '/vue-project',
+        path: '/',
         redirect: '/login' // 根路径重定向到登录页或其他需要的页面
     },      
     {

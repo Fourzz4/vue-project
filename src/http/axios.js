@@ -2,7 +2,7 @@ import axios from "axios";
 import { useUserStore } from "../store/user";
 //创建axios实例
 const instance=axios.create({
-    baseURL:'/mall.qzimp.cn/',
+    baseURL:'http://mall.qzimp.cn/',
     timeout:6000
 })
 //请求拦截器

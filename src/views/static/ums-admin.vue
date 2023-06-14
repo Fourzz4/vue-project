@@ -1,18 +1,18 @@
 <template>
     <!--
-         1 el-table显示数据,分页 
-         2  token cookie|session 服务端保存状态信息方式   
-         H5 token 如果有值 登录状态 否则就是登录
-         进入某个页面就要进行拦截：判断用户是否登录
-         通过什么方式：路由守卫
-         3 添加和更新
-    -->
+           1 el-table显示数据,分页 
+           2  token cookie|session 服务端保存状态信息方式   
+           H5 token 如果有值 登录状态 否则就是登录
+           进入某个页面就要进行拦截：判断用户是否登录
+           通过什么方式：路由守卫
+           3 添加和更新
+      -->
     <div class="adMins">
         <div class="admin-tools">
             <el-button type="warning" color="#006699" @click="refresh"><el-icon>
                     <Refresh />
                 </el-icon>刷新</el-button>
-            <el-button type="warning" color="#006699" @click="toAdd"><el-icon>
+            <el-button type="warning" color="#006699" @click="toAdd" v-if="permission()"><el-icon>
                     <Plus />
                 </el-icon>添加</el-button>
             <el-button type="warning" @click="selectById" icon="Search">按ID查询</el-button>
@@ -22,7 +22,7 @@
             <el-table-column prop="username" label="用户名" />
             <el-table-column prop="icon" label="头像">
                 <template #default="{ row }">
-                    <img v-if="row.icon" :src="row.icon" style="width: 50px; height: 50px;">
+                    <img v-if="row.icon" :src="row.icon" style="width: 50px; height: 50px" />
                     <span v-else>无头像</span>
                 </template>
             </el-table-column>
@@ -32,8 +32,17 @@
             <el-table-column prop="createTime" label="创建时间" />
             <el-table-column prop="loginTime" label="最后登录时间" />
             <el-table-column prop="status" label="帐号启用状态" />
-            <el-table-column fixed="right" label="操作" width="120">
+            <el-table-column prop="role" label="角色">
+                <template #default="{ row }">
+                    <span>{{ adminRole[row.role] || '暂无角色' }}</span>
+                </template>
+
+            </el-table-column>
+            <el-table-column fixed="right" label="操作" width="120" v-if="permission()">
                 <template #default="scope">
+                    <el-button link type="success" size="small" @click="torole(scope.row)"><el-icon>
+                            <Setting />
+                        </el-icon>设置管理员</el-button>
                     <el-button link type="primary" size="small" @click="toEdit(scope.row)"><el-icon>
                             <Edit />
                         </el-icon>更新</el-button>
@@ -83,6 +92,23 @@
             </span>
         </template>
     </el-dialog>
+    <el-dialog v-model="roleDialogVisible" title="设置管理员">
+        <el-form :model="selectedAdmin" label-width="80px">
+            <el-form-item label="角色">
+                <el-select v-model="selectedAdmin.role" placeholder="请选择角色">
+                    <el-option label="商品管理员" value="1" />
+                    <el-option label="订单管理员" value="2" />
+                    <el-option label="超级管理员" value="26" />
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="roleDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="saveRole">保存</el-button>
+            </span>
+        </template>
+    </el-dialog>
 
     <!-- 按id查询按钮点击后出现的表单 -->
     <el-dialog v-model="dialogFormVisibleById" title="查询">
@@ -102,16 +128,29 @@
         </template>
     </el-dialog>
 </template>
-
+  
 <script>
-import { defineComponent } from "vue"
-import { adminPage, adminDelId, adminAdd, adminEdit, adminOne } from "../../http/ums-admin";
+import { defineComponent, inject } from "vue"
+import { adminPage, adminDelId, adminAdd, adminEdit, adminOne, adminRoleAdd, adminRoleEdit } from "../../http/ums-admin";
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
 export default defineComponent({
+    setup() {
+        const { permission } = inject('permissions');
+
+        return {
+
+            permission
+        };
+    },
     data() {
         return {
             searchText: "",
+            adminRole: {
+                '1': '商品管理员',
+                '2': '订单管理员',
+                '3': '超级管理员'
+            },
             coupons: [],
             adMins: [],
             page: {
@@ -121,6 +160,11 @@ export default defineComponent({
             },
             dialogFormVisible: false,
             dialogFormVisibleById: false,
+            roleDialogVisible: false,
+            selectedAdmin: {
+                id: 0,
+                role: '1'
+            },
             adMin: {
                 "createTime": "",
                 "email": "",
@@ -131,7 +175,8 @@ export default defineComponent({
                 "note": "",
                 "password": "",
                 "status": 0,
-                "username": ""
+                "username": "",
+                "role": ""
             },
             formLabelWidth: 100,
             rules: {
@@ -159,6 +204,44 @@ export default defineComponent({
             this.dialogFormVisible = true;
             this.adMin = cloneDeep(admin);
         },
+        torole(row) {
+            this.selectedAdmin.id = row.id;
+            this.selectedAdmin.role = row.role || '1';
+            this.roleDialogVisible = true;
+        },
+
+        async saveRole() {
+            // 执行保存管理员角色的逻辑
+            // 可以通过 this.selectedAdmin.id 和 this.selectedAdmin.role 获取选择的管理员 ID 和角色
+            // 更新角色后台用户数量的逻辑省略
+
+            // 根据选择的管理员 ID 更新角色信息
+            const admin = this.adMins.find(a => a.id === this.selectedAdmin.id);
+            let result
+            if (!admin.role) {
+                result = await adminRoleEdit({
+                    id: admin.id,
+                    roleId: this.selectedAdmin.role
+                })
+            } else {
+                result = await adminRoleAdd({
+                    id: admin.id,
+                    roleId: this.selectedAdmin.role
+                })
+            }
+            const adminId = localStorage.getItem('adminId')
+            if (admin.id == adminId) {
+                localStorage.setItem('roleId', this.selectedAdmin.role)
+                this.refresh()
+            }
+
+
+
+            this.roleDialogVisible = false;
+            // 弹出保存成功的消息提示
+            ElMessage.success('管理员角色设置成功');
+        },
+
         getAdMinsPage(current) {
             const data = {
                 current: current,
@@ -240,7 +323,8 @@ export default defineComponent({
                 "note": "",
                 "password": "",
                 "status": 0,
-                "username": ""
+                "username": "",
+                "role": ""
             },
                 this.dialogFormVisible = true;
         },
@@ -327,7 +411,7 @@ export default defineComponent({
     }
 });
 </script>
-
+  
 <style lang="scss" scoped>
 .search-input-container {
     display: flex;
@@ -343,3 +427,4 @@ export default defineComponent({
     margin-right: 10px;
 }
 </style>
+  

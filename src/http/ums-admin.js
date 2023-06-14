@@ -42,12 +42,35 @@ const adminOne = (params) => {
       params
   })
 }
+const adminRoleOne=(params)=>{
+    return instance.request({
+        url: 'mall/ums-admin-role-relation/one/' + params.id,
+        params
+    })
+}
+const adminRoleEdit=(data)=>{
+    return instance.request({
+        url: 'mall/ums-admin-role-relation/edit',
+        data,
+        method:'post',
 
+    })
+}
+const adminRoleAdd=(data)=>{
+    return instance.request({
+        url: 'mall/ums-admin-role-relation/add',
+        method:'post',
+       data
+    })
+}
 export {
     adminLogin,
     adminPage,
     adminDelId,
     adminAdd,
     adminEdit,
-    adminOne
+    adminOne,
+    adminRoleOne,
+    adminRoleEdit,
+    adminRoleAdd
 } 

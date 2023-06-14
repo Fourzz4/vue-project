@@ -4,7 +4,7 @@
             <div class="login-header">
                 <img src="/src/assets/logo.png"/>
             </div>
-            <el-form :model="formData" @submit.prevent="login" class="login-form">
+            <el-form :model="formData" @submit.prevent="login" class="login-form" label-width="55">
                 <el-form-item label="用户名">
                     <el-input v-model="formData.username"></el-input>
                 </el-form-item>
@@ -14,7 +14,7 @@
                 <div class="login-header">
                     <el-form-item>
                         <el-button type="primary" native-type="submit">登录</el-button>
-                        <el-button type="info" plain @click="resetForm">重置</el-button>
+                        <el-button type="primary" @click="resetForm">重置</el-button>
                     </el-form-item>
                 </div>
             </el-form>
@@ -25,13 +25,13 @@
 <script>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { adminLogin } from "../../http/ums-admin"; // Replace with the actual API file location
+import { adminLogin,adminRoleOne } from "../../http/ums-admin"; // Replace with the actual API file location
 
 export default {
     setup() {
         const formData = ref({
-            username: '',
-            password: '',
+            username: '414090297',
+            password: '12345678',
         });
         const router = useRouter();
 
@@ -49,8 +49,13 @@ export default {
             }
             try {
                 const response = await adminLogin(formData.value);
-                // Handle successful login, e.g., store token in local storage
                 localStorage.setItem('token', response.token);
+                localStorage.setItem('adminId',response.data.admin.id)
+                const result = await adminRoleOne(response.data.admin)
+                if(result.data&&result.data.help){
+                    localStorage.setItem('roleId', result.data.help.roleId);
+                }
+                // Handle successful login, e.g., store token in local storage
                 // Redirect to the desired page, e.g., home page
                 router.push('/ums-admin');
             } catch (error) {

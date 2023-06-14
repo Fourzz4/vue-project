@@ -12,7 +12,7 @@
             <el-button type="warning" color="#006699" @click="refresh"><el-icon>
                     <Refresh />
                 </el-icon>刷新</el-button>
-            <el-button type="warning" color="#006699" @click="toAdd"><el-icon>
+            <el-button type="warning" color="#006699" @click="toAdd" v-if="permission()"><el-icon>
                     <Plus />
                 </el-icon>添加</el-button>
             <el-button type="warning" @click="selectById" icon="Search">按ID查询</el-button>
@@ -24,7 +24,7 @@
             <el-table-column prop="url" label="资源URL" />
             <el-table-column prop="description" label="描述" />
             <el-table-column prop="createTime" label="创建时间" />
-            <el-table-column fixed="right" label="操作" width="120">
+            <el-table-column fixed="right" label="操作" width="120" v-if="permission()">
                 <template #default="scope">
                     <el-button link type="primary" size="small" @click="toEdit(scope.row)"><el-icon>
                             <Edit />
@@ -86,11 +86,19 @@
 </template>
 
 <script>
-import { defineComponent } from "vue"
+import { defineComponent ,inject} from "vue"
 import { resPage, resDelId, resAdd, resEdit, resOne } from "../../http/ums-resource";
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
 export default defineComponent({
+    setup() {
+    const { permission } = inject('permissions');
+
+    return {
+     
+        permission
+    };
+},
     data() {
         return {
             searchText: "",

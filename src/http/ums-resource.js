@@ -1,45 +1,45 @@
 //统一api管理
 import instance from "./axios";
-//data json
-const resPage=(data)=>{
+// data json
+const perPage=(data)=>{
    return instance.request({
-    url:'/mall/ums-resource/page',
+    url:'/mall/ums-permission/page',
     method:'post',
     data
    })
 }
-const resDelId=(params)=>{
+const perDelId=(params)=>{
     return instance.request({
-        url:'/mall/ums-resource/del/' + params.id,
+        url:'/mall/ums-permission/del/' + params.id,
         params
     })
 }
-const resAdd=(data)=>{
+const perAdd=(data)=>{
     return instance.request({
-        url:'/mall/ums-resource/add',
+        url:'/mall/ums-permission/add',
         method:'post',
         data
     })
 }
-const resEdit=(data)=>{
+const perEdit=(data)=>{
     return instance.request({
-        url:'/mall/ums-resource/edit',
+        url:'/mall/ums-permission/edit',
         method:'post',
         data
     })
 }
 
-const resOne = (params) => {
+const perOne = (params) => {
   return instance.request({
-      url: 'mall/ums-resource/one/' + params.id,
+      url: '/mall/ums-permission/one/' + params.id,
       params
   })
 }
 
 export {
-    resPage,
-    resDelId,
-    resAdd,
-    resEdit,
-    resOne
+    perPage,
+    perDelId,
+    perAdd,
+    perEdit,
+    perOne
 } 

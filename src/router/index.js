@@ -6,10 +6,6 @@ import Login from '../views/static/login.vue'
 const routes = [
     {
         path: '/',
-        redirect: '/login' // 根路径重定向到登录页或其他需要的页面
-    },      
-    {
-        path: '/login',
         name: 'home',
         component: () => import('../views/static/login.vue')
     },
@@ -47,9 +43,10 @@ const routes = [
 ]
 //创建路由管理 router
 const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes,
 });
+
 router.beforeEach((to, from, next) => {
     const isAuthenticated = localStorage.getItem('token');
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
